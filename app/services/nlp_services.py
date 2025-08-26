@@ -32,7 +32,7 @@ class NLPService:
                 pipeline, 
                 "summarization", 
                 settings.SUMMARIZATION_MODEL,
-                device=0 if torch.cuda.is_available() else -1
+                # device parameter removed; set device after pipeline creation if needed
             )
             
             # Initialize sentiment analysis model
@@ -41,7 +41,7 @@ class NLPService:
                 pipeline,
                 "sentiment-analysis",
                 settings.SENTIMENT_MODEL,
-                device=0 if torch.cuda.is_available() else -1
+                # device parameter removed; set device after pipeline creation if needed
             )
             
             # Initialize NER model for entity extraction
@@ -49,9 +49,11 @@ class NLPService:
                 None,
                 pipeline,
                 "ner",
-                settings.NER_MODEL,
-                device=0 if torch.cuda.is_available() else -1
+                settings.NER_MODEL
             )
+            # Optionally move model to CUDA if available
+            if torch.cuda.is_available() and hasattr(self.ner_pipeline, 'model'):
+                self.ner_pipeline.model = self.ner_pipeline.model.to(torch.device('cuda'))
             
             self._initialized = True
             print("NLP models initialized successfully")
@@ -71,16 +73,14 @@ class NLPService:
                 None,
                 pipeline,
                 "summarization",
-                "facebook/bart-base",
-                device=-1  # CPU only for fallback
+                "facebook/bart-base"
             )
             
             self.sentiment_analyzer = await loop.run_in_executor(
                 None,
                 pipeline,
                 "sentiment-analysis",
-                "distilbert-base-uncased-finetuned-sst-2-english",
-                device=-1
+                "distilbert-base-uncased-finetuned-sst-2-english"
             )
             
             self._initialized = True
