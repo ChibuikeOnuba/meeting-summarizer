@@ -7,8 +7,8 @@ from datetime import datetime
 import json
 
 from app.models.meeting import MeetingCreate, MeetingResponse, ActionItem
-from app.services.nlp_service import NLPService
-from app.services.database_service import DatabaseService
+from app.services.nlp_services import NLPService
+from app.services.database_services import DatabaseService
 from app.config import settings
 
 app = FastAPI(
@@ -74,7 +74,9 @@ async def summarize_meeting(
             summary=summary,
             sentiment=sentiment,
             participants=participants.split(",") if participants else [],
-            action_items=action_items
+            action_items=action_items,
+            duration_minutes=0,  # Provide a default or calculated value
+            meeting_date=datetime.utcnow()  # Provide the current date/time or another value
         )
         
         # Save to database
